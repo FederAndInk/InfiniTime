@@ -16,3 +16,7 @@ github:
     addBadge: false
     # add a label once the prebuild is ready to pull requests (defaults to false)
     addLabel: false #prebuilt-in-gitpod
+vscode:
+  extensions:
+    - ms-vscode.cmake-tools
+    - ccls-project.ccls
