@@ -1,0 +1,9 @@
+%compile_commands.json
+--target=arm-none-eabi
+--gcc-toolchain=@ARM_NONE_EABI_TOOLCHAIN_PATH@
+%h -x
+%h c++-header
+%c -std=c@CMAKE_C_STANDARD@
+%cpp -std=c++@CMAKE_CXX_STANDARD@
+%h %hpp
+@ARM_GCC_TOOLCHAIN_SYSTEM_HEADERS@
