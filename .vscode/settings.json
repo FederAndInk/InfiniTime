@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "ccls.misc.compilationDatabaseDirectory": "build",
+    "ccls.cache.directory": "${workspaceFolder}/.vscode/.ccls-cache/",
     "cmake.configureArgs": [
         "-DARM_NONE_EABI_TOOLCHAIN_PATH=${env:ARM_NONE_EABI_TOOLCHAIN_PATH}",
         "-DNRF5_SDK_PATH=${env:NRF5_SDK_PATH}",
