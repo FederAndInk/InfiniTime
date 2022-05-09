@@ -1143,15 +1143,8 @@ endif ()
 # getting system includes (used for ccls)
 
 execute_process(
-        COMMAND ${CMAKE_CXX_COMPILER} -print-prog-name=cc1plus
-        OUTPUT_VARIABLE CC1PLUS_EXE
-)
-
-string(STRIP ${CC1PLUS_EXE} CC1PLUS_EXE)
-
-execute_process(
         COMMAND echo
-        COMMAND ${CC1PLUS_EXE} -v
+        COMMAND ${CMAKE_CXX_COMPILER} -E -Wp,-v -xc++ /dev/null
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         ERROR_VARIABLE ARM_NONE_EABI_TOOLCHAIN_INFO
         COMMAND_ECHO STDOUT
