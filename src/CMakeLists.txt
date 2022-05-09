@@ -1138,3 +1138,39 @@ elseif (USE_OPENOCD)
                 )
     endif ()
 endif ()
+
+
+# getting system includes (used for ccls)
+
+execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} -print-prog-name=cc1plus
+        OUTPUT_VARIABLE CC1PLUS_EXE
+)
+
+string(STRIP ${CC1PLUS_EXE} CC1PLUS_EXE)
+
+execute_process(
+        COMMAND echo
+        COMMAND ${CC1PLUS_EXE} -v
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        ERROR_VARIABLE ARM_NONE_EABI_TOOLCHAIN_INFO
+        COMMAND_ECHO STDOUT
+)
+
+message("ARM_NONE_EABI_TOOLCHAIN_INFO: ${ARM_NONE_EABI_TOOLCHAIN_INFO}")
+
+# find the system includes part
+string(FIND "${ARM_NONE_EABI_TOOLCHAIN_INFO}" "#include <...> search starts here:" ARM_INCLUDES_BEGIN)
+string(FIND "${ARM_NONE_EABI_TOOLCHAIN_INFO}" "End of search list." ARM_INCLUDES_END)
+
+message("pos: ${ARM_INCLUDES_BEGIN} -> ${ARM_INCLUDES_END}")
+math(EXPR ARM_INCLUDES_BEGIN "${ARM_INCLUDES_BEGIN} + 35")
+math(EXPR ARM_INCLUDES_LEN "${ARM_INCLUDES_END} - ${ARM_INCLUDES_BEGIN}")
+
+string(SUBSTRING "${ARM_NONE_EABI_TOOLCHAIN_INFO}" ${ARM_INCLUDES_BEGIN} ${ARM_INCLUDES_LEN} ARM_GCC_TOOLCHAIN_SYSTEM_HEADERS)
+
+string(REGEX REPLACE "(^|\n) " "\\1-isystem" ARM_GCC_TOOLCHAIN_SYSTEM_HEADERS "${ARM_GCC_TOOLCHAIN_SYSTEM_HEADERS}")
+
+message("includes: ${ARM_GCC_TOOLCHAIN_SYSTEM_HEADERS}")
+
+configure_file(${CMAKE_SOURCE_DIR}/.ccls.in ${CMAKE_SOURCE_DIR}/.ccls)
