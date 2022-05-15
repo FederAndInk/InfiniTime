@@ -3,6 +3,7 @@
 #include "displayapp/screens/HeartRate.h"
 #include "displayapp/screens/Motion.h"
 #include "displayapp/screens/Timer.h"
+#include "displayapp/screens/TeaTimer.h"
 #include "displayapp/screens/Alarm.h"
 #include "components/battery/BatteryController.h"
 #include "components/ble/BleController.h"
@@ -365,6 +366,9 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
     case Apps::Timer:
       currentScreen = std::make_unique<Screens::Timer>(this, timerController);
+      break;
+    case Apps::TeaTimer:
+      currentScreen = std::make_unique<Screens::TeaTimer>(this, timerController);
       break;
     case Apps::Alarm:
       currentScreen = std::make_unique<Screens::Alarm>(this, alarmController, settingsController, *systemTask);
