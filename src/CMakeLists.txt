@@ -1103,6 +1103,7 @@ elseif (USE_OPENOCD)
         add_custom_target(FLASH_ERASE
                 COMMAND ${OPENOCD_BIN_PATH} -c 'source [find interface/cmsis-dap.cfg]' -c 'transport select swd'
                 -c 'source [find target/nrf52.cfg]'
+                -c 'adapter speed 8000'
                 -c 'init'
                 -c 'halt'
                 -c 'nrf5 mass_erase'
@@ -1119,6 +1120,7 @@ elseif (USE_OPENOCD)
                 -c 'telnet_port 4444'
                 -c 'source [find interface/cmsis-dap.cfg]'
                 -c 'transport select swd'
+                -c 'adapter speed 8000'
                 -c 'source [find target/nrf52.cfg]'
                 -c 'halt'
                 -c "program \"${EXECUTABLE_FILE_NAME}.hex\""
@@ -1128,12 +1130,12 @@ elseif (USE_OPENOCD)
                 )
     else ()
         add_custom_target(FLASH_ERASE
-                COMMAND ${OPENOCD_BIN_PATH} -f interface/stlink.cfg -c 'transport select hla_swd' -f target/nrf52.cfg -c init -c halt -c 'nrf5 mass_erase' -c reset -c shutdown
+                COMMAND ${OPENOCD_BIN_PATH} -f interface/stlink.cfg -c 'transport select hla_swd' -f target/nrf52.cfg  -c 'adapter speed 8000' -c init -c halt -c 'nrf5 mass_erase' -c reset -c shutdown
                 COMMENT "erasing flashing"
                 )
         add_custom_target("FLASH_${EXECUTABLE_NAME}"
                 DEPENDS ${EXECUTABLE_NAME}
-                COMMAND ${OPENOCD_BIN_PATH} -c "tcl_port disabled" -c "gdb_port 3333" -c "telnet_port 4444" -f interface/stlink.cfg -c 'transport select hla_swd' -f target/nrf52.cfg -c "program \"${EXECUTABLE_FILE_NAME}.hex\"" -c reset -c shutdown
+                COMMAND ${OPENOCD_BIN_PATH} -c "tcl_port disabled" -c "gdb_port 3333" -c "telnet_port 4444" -f interface/stlink.cfg -c 'transport select hla_swd' -f target/nrf52.cfg  -c "adapter speed 8000" -c "program \"${EXECUTABLE_FILE_NAME}.hex\"" -c reset -c shutdown
                 COMMENT "flashing ${EXECUTABLE_FILE_NAME}.hex"
                 )
     endif ()
