@@ -45,6 +45,7 @@ NimbleController::NimbleController(Pinetime::System::SystemTask& systemTask,
     currentTimeService {dateTimeController},
     musicService {systemTask},
     weatherService {systemTask, dateTimeController},
+    calendarEventService {},
     navService {systemTask},
     batteryInformationService {batteryController},
     immediateAlertService {systemTask, notificationManager},
@@ -92,6 +93,7 @@ void NimbleController::Init() {
   currentTimeService.Init();
   musicService.Init();
   weatherService.Init();
+  calendarEventService.Init();
   navService.Init();
   anService.Init();
   dfuService.Init();

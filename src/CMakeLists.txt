@@ -459,6 +459,7 @@ list(APPEND SOURCE_FILES
         components/ble/AlertNotificationService.cpp
         components/ble/MusicService.cpp
         components/ble/weather/WeatherService.cpp
+        components/ble/CalendarEventService.cpp
         components/ble/NavigationService.cpp
         components/ble/BatteryInformationService.cpp
         components/ble/FSService.cpp
@@ -526,6 +527,7 @@ list(APPEND RECOVERY_SOURCE_FILES
         components/ble/AlertNotificationService.cpp
         components/ble/MusicService.cpp
         components/ble/weather/WeatherService.cpp
+        components/ble/CalendarEventService.cpp
         components/ble/BatteryInformationService.cpp
         components/ble/FSService.cpp
         components/ble/ImmediateAlertService.cpp
@@ -583,6 +585,7 @@ set(INCLUDE_FILES
 
         ${CMAKE_CURRENT_BINARY_DIR}/src/Version.h
         BootloaderVersion.h
+        FlatLinkedList.h
         logging/Logger.h
         logging/NrfLogger.h
         displayapp/DisplayApp.h
@@ -650,6 +653,7 @@ set(INCLUDE_FILES
         components/ble/HeartRateService.h
         components/ble/MotionService.h
         components/ble/weather/WeatherService.h
+        components/ble/CalendarEventService.h
         components/settings/Settings.h
         components/timer/TimerController.h
         components/alarm/AlarmController.h
