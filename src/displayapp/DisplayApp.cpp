@@ -11,6 +11,7 @@
 #include "components/motion/MotionController.h"
 #include "components/motor/MotorController.h"
 #include "displayapp/screens/ApplicationList.h"
+#include "displayapp/screens/CalendarTimeline.h"
 #include "displayapp/screens/Clock.h"
 #include "displayapp/screens/FirmwareUpdate.h"
 #include "displayapp/screens/FirmwareValidation.h"
@@ -219,6 +220,9 @@ void DisplayApp::Refresh() {
               case TouchEvents::SwipeRight:
                 LoadApp(Apps::QuickSettings, DisplayApp::FullRefreshDirections::RightAnim);
                 break;
+              case TouchEvents::SwipeLeft:
+                LoadApp(Apps::CalendarTimeline, DisplayApp::FullRefreshDirections::LeftAnim);
+                break;
               case TouchEvents::DoubleTap:
                 PushMessageToSystemTask(System::Messages::GoToSleep);
                 break;
@@ -247,6 +251,8 @@ void DisplayApp::Refresh() {
             LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Up);
           } else if (currentApp == Apps::QuickSettings) {
             LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::LeftAnim);
+          } else if (currentApp == Apps::CalendarTimeline) {
+            LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::RightAnim);
           } else {
             LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Down);
           }
@@ -363,6 +369,10 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
                                                                *systemTask,
                                                                Screens::Notifications::Modes::Preview);
       ReturnApp(Apps::Clock, FullRefreshDirections::Up, TouchEvents::SwipeUp);
+      break;
+    case Apps::CalendarTimeline:
+      currentScreen = std::make_unique<Screens::CalendarTimeline>(this, systemTask->nimble().calendarEvent());
+      ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeRight);
       break;
     case Apps::Timer:
       currentScreen = std::make_unique<Screens::Timer>(this, timerController);
