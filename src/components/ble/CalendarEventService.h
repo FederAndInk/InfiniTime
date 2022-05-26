@@ -42,6 +42,14 @@ namespace Pinetime {
         char const* GetTitle() const {
           return title.data();
         }
+
+        char const* GetDescription() const {
+          return title.data();
+        }
+
+        char const* GetLocation() const {
+          return title.data();
+        }
       };
 
       using EventRange = FlatLinkedList<CalendarEvent, 10>;
@@ -51,6 +59,8 @@ namespace Pinetime {
       }
 
     private:
+      EventRange::iterator FindSpotForEvent(std::int32_t timestamp);
+
       std::array<ble_gatt_chr_def, 2> characteristicDefinition;
       std::array<ble_gatt_svc_def, 2> serviceDefinition;
 
