@@ -3,6 +3,8 @@
 #include "displayapp/screens/Screen.h"
 #include <lvgl/lvgl.h>
 
+#include <memory>
+
 namespace Pinetime {
   namespace Controllers {
     class CalendarEventService;
@@ -10,13 +12,18 @@ namespace Pinetime {
 
   namespace Applications {
     namespace Screens {
+      class CalendarTimelinePage;
+
       class CalendarTimeline : public Screen {
       public:
-        explicit CalendarTimeline(DisplayApp* app, Pinetime::Controllers::CalendarEventService& calendarEvent);
+        explicit CalendarTimeline(DisplayApp* app, Controllers::CalendarEventService& calendarEvent);
         ~CalendarTimeline() override;
 
+        bool OnTouchEvent(TouchEvents event) override;
+
       private:
-        Pinetime::Controllers::CalendarEventService& calendarEvent;
+        Controllers::CalendarEventService& calendarEvent;
+        std::unique_ptr<CalendarTimelinePage> page;
       };
     }
   }
