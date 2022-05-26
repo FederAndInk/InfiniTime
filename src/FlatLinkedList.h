@@ -39,17 +39,31 @@ namespace Pinetime {
     class Iterator {
     private:
       friend FlatLinkedList;
-      using cond_reference = std::conditional_t<isConst, const_reference, reference>;
-      using cond_pointer = std::conditional_t<isConst, const_pointer, pointer>;
+      using cond_reference = std::conditional_t<isConst, FlatLinkedList::const_reference, FlatLinkedList::reference>;
+      using cond_pointer = std::conditional_t<isConst, FlatLinkedList::const_pointer, FlatLinkedList::pointer>;
       using cond_FlatLinkedList = std::conditional_t<isConst, const FlatLinkedList, FlatLinkedList>;
 
       constexpr Iterator(size_type pos, cond_FlatLinkedList& fll) : pos {pos}, fll {fll} {
       }
 
     public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = FlatLinkedList::value_type;
+      using pointer = cond_pointer;
+      using reference = cond_reference;
+
+      constexpr Iterator(Iterator<false> const& other) : pos {other.pos}, fll {other.fll} {
+      }
+
       constexpr Iterator& operator++() {
         pos = fll.arr[pos].fllNextIdx;
         return *this;
+      }
+      constexpr Iterator operator++(int) const {
+        auto tmp = *this;
+        ++(*this);
+        return tmp;
       }
       constexpr Iterator& operator--() {
         if (pos == npos) {
@@ -59,14 +73,33 @@ namespace Pinetime {
         }
         return *this;
       }
-      constexpr cond_reference operator*() {
+      constexpr Iterator operator--(int) const {
+        auto tmp = *this;
+        --(*this);
+        return tmp;
+      }
+
+      constexpr reference operator*() const {
         return fll.arr[pos];
       }
-      constexpr cond_pointer operator->() {
+      constexpr pointer operator->() const {
         return &fll.arr[pos];
       }
-      constexpr explicit operator cond_pointer() const {
+
+      constexpr explicit operator pointer() const {
         return &fll.arr[pos];
+      }
+
+      constexpr bool HasNext() const {
+        return pos != npos && (*this)->fllNextIdx != npos;
+      }
+
+      constexpr bool HasPrev() const {
+        if (pos == npos) {
+          return fll.lastIdx != npos;
+        } else {
+          return (*this)->fllPrevIdx != npos;
+        }
       }
 
       friend constexpr bool operator==(Iterator const& lhs, Iterator const& rhs) {
@@ -91,17 +124,7 @@ namespace Pinetime {
     }
 
     constexpr iterator emplace_back() {
-      size_type newIdx = takeFreeElem();
-
-      arr[newIdx].fllPrevIdx = lastIdx;
-      if (!empty()) {
-        arr[lastIdx].fllNextIdx = newIdx;
-      } else {
-        firstIdx = newIdx;
-      }
-      lastIdx = newIdx;
-      ++sz;
-      return iterator(lastIdx, *this);
+      return emplace(end());
     }
 
     /**
@@ -113,15 +136,21 @@ namespace Pinetime {
     constexpr iterator emplace(iterator pos) {
       size_type newIdx = takeFreeElem();
 
-      arr[newIdx].fllPrevIdx = lastIdx;
-      if (!empty()) {
-        arr[lastIdx].fllNextIdx = newIdx;
+      arr[newIdx].fllNextIdx = pos.pos;
+      if (pos != end()) {
+        arr[newIdx].fllPrevIdx = pos->fllPrevIdx;
+        pos->fllPrevIdx = newIdx;
+      } else {
+        arr[newIdx].fllPrevIdx = lastIdx;
+        lastIdx = newIdx;
+      }
+      if (arr[newIdx].fllPrevIdx != npos) {
+        arr[arr[newIdx].fllPrevIdx].fllNextIdx = newIdx;
       } else {
         firstIdx = newIdx;
       }
-      lastIdx = newIdx;
       ++sz;
-      return iterator(lastIdx, *this);
+      return iterator(newIdx, *this);
     }
 
     constexpr reference front() {
