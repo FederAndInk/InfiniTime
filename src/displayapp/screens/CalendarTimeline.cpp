@@ -3,6 +3,17 @@
 #include "components/ble/CalendarEventService.h"
 #include "displayapp/DisplayApp.h"
 
+namespace {
+  void RemoveNl(lv_obj_t* label) {
+    char* pchar = strchr(lv_label_get_text(label), '\n');
+    while (pchar != nullptr) {
+      *pchar = ' ';
+      pchar = strchr(pchar + 1, '\n');
+    }
+    lv_label_refr_text(label);
+  }
+}
+
 namespace Pinetime {
   namespace Applications {
     namespace Screens {
@@ -133,21 +144,25 @@ namespace Pinetime {
 
         lv_obj_t* ev_title_label = lv_label_create(cont_event, nullptr);
         lv_obj_set_style_local_text_color(ev_title_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
-        lv_label_set_long_mode(ev_title_label, LV_LABEL_LONG_DOT);
+        lv_label_set_text(ev_title_label, ev.GetTitle());
+        RemoveNl(ev_title_label);
+        lv_label_set_long_mode(ev_title_label, LV_LABEL_LONG_CROP);
         lv_obj_set_width(ev_title_label, LV_HOR_RES);
-        lv_label_set_text_static(ev_title_label, ev.GetTitle());
 
         lv_obj_t* ev_loc_label = lv_label_create(cont_event, nullptr);
         lv_obj_set_style_local_text_color(ev_loc_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
-        lv_label_set_long_mode(ev_loc_label, LV_LABEL_LONG_DOT);
+        lv_label_set_text(ev_loc_label, ev.GetLocation());
+        RemoveNl(ev_loc_label);
+        lv_label_set_long_mode(ev_loc_label, LV_LABEL_LONG_CROP);
         lv_obj_set_width(ev_loc_label, LV_HOR_RES);
-        lv_label_set_text_static(ev_loc_label, ev.GetLocation());
 
         lv_obj_t* ev_time_label = lv_label_create(cont_event, nullptr);
         lv_obj_set_style_local_text_color(ev_time_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
+        // lv_label_set_text_static(ev_time_label, "11:30 AM - 12:30 PM");
+        lv_label_set_text(ev_time_label, ev.GetDescription());
+        RemoveNl(ev_time_label);
         lv_label_set_long_mode(ev_time_label, LV_LABEL_LONG_CROP);
         lv_obj_set_width(ev_time_label, LV_HOR_RES);
-        lv_label_set_text_static(ev_time_label, "11:30 AM - 12:30 PM");
       }
 
       Controllers::CalendarEventService::EventRange::const_iterator CalendarTimelinePage::Next() const {
