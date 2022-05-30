@@ -27,29 +27,26 @@ namespace Pinetime {
         std::int32_t durationInSeconds;
         std::int32_t timestamp;
 
-        static constexpr std::size_t maxTitleSize {50};
-        std::array<char, maxTitleSize + 1> title;
+        static constexpr std::size_t maxStringsSize {150};
+        /// title + '\0' + location + '\0' + description + '\0'
+        std::array<char, maxStringsSize + 3> strings;
 
         static constexpr std::size_t idOffset {0};
         static constexpr std::size_t durationOffset {sizeof(id)};
         static constexpr std::size_t timestampOffset {durationOffset + sizeof(durationInSeconds)};
-        static constexpr std::size_t titleOffset {timestampOffset + sizeof(timestamp)};
+        static constexpr std::size_t stringsOffset {timestampOffset + sizeof(timestamp)};
         static constexpr std::size_t headerSize {sizeof(id) + sizeof(durationInSeconds) + sizeof(timestamp)};
 
         std::uint8_t fllNextIdx;
         std::uint8_t fllPrevIdx;
 
         char const* GetTitle() const {
-          return title.data();
+          return strings.data();
         }
 
-        char const* GetDescription() const {
-          return title.data();
-        }
+        char const* GetDescription() const;
 
-        char const* GetLocation() const {
-          return title.data();
-        }
+        char const* GetLocation() const;
       };
 
       using EventRange = FlatLinkedList<CalendarEvent, 10>;

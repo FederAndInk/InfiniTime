@@ -17,11 +17,33 @@ namespace {
 
   constexpr ble_uuid128_t calEventUuid {CalEventBaseUuid()};
   constexpr ble_uuid128_t calEventAddCharUuid {CalEventCharUuid(0x00, 0x01)};
+
+  template <std::size_t N> //
+  constexpr char const* NthStr(std::array<char, N> const& strs, std::uint8_t n) {
+    auto beginIt = std::begin(strs);
+    while (n > 0) {
+      beginIt = std::find(beginIt, std::end(strs), '\0');
+      // should always be true!
+      if (beginIt == std::end(strs) || ++beginIt == std::end(strs)) {
+        return "";
+      }
+      --n;
+    }
+    return beginIt;
+  }
 }
 
 namespace Pinetime {
   namespace Controllers {
-    constexpr std::size_t CalendarEventService::CalendarEvent::maxTitleSize;
+    constexpr std::size_t CalendarEventService::CalendarEvent::maxStringsSize;
+
+    char const* CalendarEventService::CalendarEvent::GetDescription() const {
+      return NthStr(strings, 2);
+    }
+
+    char const* CalendarEventService::CalendarEvent::GetLocation() const {
+      return NthStr(strings, 1);
+    }
 
     CalendarEventService::CalendarEventService()
       : characteristicDefinition {{{.uuid = &calEventAddCharUuid.u,
@@ -52,7 +74,7 @@ namespace Pinetime {
           return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
         }
 
-        const auto titleSize = std::min(CalendarEvent::maxTitleSize, packetLen - CalendarEvent::headerSize);
+        const auto strsSize = std::min(CalendarEvent::maxStringsSize, packetLen - CalendarEvent::headerSize);
 
         decltype(CalendarEvent::timestamp) newEvTimestamp {};
         int res = os_mbuf_copydata(ctxt->om, CalendarEvent::timestampOffset, sizeof(CalendarEvent::timestamp), &newEvTimestamp);
@@ -79,8 +101,8 @@ namespace Pinetime {
           res = os_mbuf_copydata(ctxt->om, CalendarEvent::durationOffset, sizeof(newEv->durationInSeconds), &newEv->durationInSeconds);
           ASSERT(res == 0);
           newEv->timestamp = newEvTimestamp;
-          res = os_mbuf_copydata(ctxt->om, CalendarEvent::titleOffset, titleSize, newEv->title.data());
-          newEv->title[titleSize] = '\0';
+          res = os_mbuf_copydata(ctxt->om, CalendarEvent::stringsOffset, strsSize, newEv->strings.data());
+          newEv->strings[strsSize] = '\0';
           ASSERT(res == 0);
         }
       }
