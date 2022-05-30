@@ -105,3 +105,5 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docker/post_build.sh.in ${CMAKE_CURRE
 
 
 add_subdirectory(src)
+enable_testing()
+add_subdirectory(tests)
