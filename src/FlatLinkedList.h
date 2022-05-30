@@ -43,7 +43,7 @@ namespace Pinetime {
       using cond_pointer = std::conditional_t<isConst, FlatLinkedList::const_pointer, FlatLinkedList::pointer>;
       using cond_FlatLinkedList = std::conditional_t<isConst, const FlatLinkedList, FlatLinkedList>;
 
-      constexpr Iterator(size_type pos, cond_FlatLinkedList& fll) : pos {pos}, fll {fll} {
+      constexpr Iterator(size_type pos, cond_FlatLinkedList& fll) : pos {pos}, fll {&fll} {
       }
 
     public:
@@ -57,7 +57,7 @@ namespace Pinetime {
       }
 
       constexpr Iterator& operator++() {
-        pos = fll.arr[pos].fllNextIdx;
+        pos = fll->arr[pos].fllNextIdx;
         return *this;
       }
       constexpr Iterator operator++(int) const {
@@ -67,9 +67,9 @@ namespace Pinetime {
       }
       constexpr Iterator& operator--() {
         if (pos == npos) {
-          pos = fll.lastIdx;
+          pos = fll->lastIdx;
         } else {
-          pos = fll.arr[pos].fllPrevIdx;
+          pos = fll->arr[pos].fllPrevIdx;
         }
         return *this;
       }
@@ -80,14 +80,14 @@ namespace Pinetime {
       }
 
       constexpr reference operator*() const {
-        return fll.arr[pos];
+        return fll->arr[pos];
       }
       constexpr pointer operator->() const {
-        return &fll.arr[pos];
+        return &fll->arr[pos];
       }
 
       constexpr explicit operator pointer() const {
-        return &fll.arr[pos];
+        return &fll->arr[pos];
       }
 
       constexpr bool HasNext() const {
@@ -96,7 +96,7 @@ namespace Pinetime {
 
       constexpr bool HasPrev() const {
         if (pos == npos) {
-          return fll.lastIdx != npos;
+          return fll->lastIdx != npos;
         } else {
           return (*this)->fllPrevIdx != npos;
         }
@@ -112,7 +112,7 @@ namespace Pinetime {
 
     private:
       size_type pos;
-      cond_FlatLinkedList& fll;
+      cond_FlatLinkedList* fll;
     };
 
     using iterator = Iterator</*isConst:*/ false>;
