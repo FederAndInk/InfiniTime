@@ -8,6 +8,7 @@
 namespace Pinetime {
   namespace Controllers {
     class CalendarEventService;
+    class DateTime;
   }
 
   namespace Applications {
@@ -16,13 +17,16 @@ namespace Pinetime {
 
       class CalendarTimeline : public Screen {
       public:
-        explicit CalendarTimeline(DisplayApp* app, Controllers::CalendarEventService& calendarEvent);
+        explicit CalendarTimeline(DisplayApp* app,
+                                  Controllers::CalendarEventService& calendarEvent,
+                                  Controllers::DateTime& dateTimeController);
         ~CalendarTimeline() override;
 
         bool OnTouchEvent(TouchEvents event) override;
 
       private:
         Controllers::CalendarEventService& calendarEvent;
+        Controllers::DateTime& dateTimeController;
         std::unique_ptr<CalendarTimelinePage> page;
       };
     }

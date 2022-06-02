@@ -371,7 +371,7 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       ReturnApp(Apps::Clock, FullRefreshDirections::Up, TouchEvents::SwipeUp);
       break;
     case Apps::CalendarTimeline:
-      currentScreen = std::make_unique<Screens::CalendarTimeline>(this, systemTask->nimble().calendarEvent());
+      currentScreen = std::make_unique<Screens::CalendarTimeline>(this, systemTask->nimble().calendarEvent(), dateTimeController);
       ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeRight);
       break;
     case Apps::Timer:

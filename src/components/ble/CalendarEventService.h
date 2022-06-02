@@ -11,6 +11,8 @@
 
 #include <cstdint>
 #include <array>
+#include <chrono>
+#include <date/date.h>
 
 namespace Pinetime {
   namespace Controllers {
@@ -25,6 +27,10 @@ namespace Pinetime {
       struct CalendarEvent {
         std::int64_t id;
         std::int32_t durationInSeconds;
+        /**
+         * @brief start timestamp in the local timezone!
+         *
+         */
         std::int32_t timestamp;
 
         static constexpr std::size_t maxStringsSize {150};
@@ -47,6 +53,14 @@ namespace Pinetime {
         char const* GetDescription() const;
 
         char const* GetLocation() const;
+
+        std::chrono::system_clock::time_point GetStartTimePoint() const {
+          return std::chrono::system_clock::from_time_t(timestamp);
+        }
+
+        std::chrono::time_point<std::chrono::system_clock, date::days> GetStartDays() const {
+          return date::floor<date::days>(GetStartTimePoint());
+        }
       };
 
       using EventRange = FlatLinkedList<CalendarEvent, 10>;
