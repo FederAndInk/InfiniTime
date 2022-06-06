@@ -66,10 +66,132 @@ std::ostream& operator<<(std::ostream& out, PODTest const& pod) {
              << "}";
 }
 
+constexpr std::uint8_t FLL_CAPACITY = 10;
+namespace Pinetime {
+  // template <typename T, std::uint8_t N> //
+  std::ostream& operator<<(std::ostream& out, typename Pinetime::FlatLinkedList<PODTest, FLL_CAPACITY>::const_iterator it) {
+    return out << "&(" << *it << ")";
+  }
+
+  // template <typename T, std::uint8_t N> //
+  std::ostream& operator<<(std::ostream& out, typename Pinetime::FlatLinkedList<PODTest, FLL_CAPACITY>::iterator it) {
+    return out << (typename Pinetime::FlatLinkedList<PODTest, FLL_CAPACITY>::const_iterator {it});
+  }
+}
+
 std::mt19937 gen(std::random_device {}());
 
+int uniform_rand(int min, int max) {
+  std::uniform_int_distribution<int> dist(min, max);
+  return dist(gen);
+}
+
+template <typename T, std::uint8_t N, typename Rng> //
+void require_equal(Pinetime::FlatLinkedList<T, N> const& fll, Rng const& rng) {
+  REQUIRE(fll.size() == rng.size());
+  REQUIRE(std::equal(std::begin(fll), std::end(fll), std::begin(rng), std::end(rng)));
+  REQUIRE(
+    std::equal(std::make_reverse_iterator(std::end(fll)), std::make_reverse_iterator(std::begin(fll)), std::rbegin(rng), std::rend(rng)));
+  REQUIRE(fll.empty() == rng.empty());
+  if (!fll.empty()) {
+    REQUIRE(fll.front() == rng.front());
+    REQUIRE(fll.back() == rng.back());
+  }
+}
+
+template <std::uint8_t N> //
+void test_erase(Pinetime::FlatLinkedList<PODTest, N>& fll);
+
+template <bool do_test_erase, std::uint8_t N> //
+void test_random_fill_sorted(Pinetime::FlatLinkedList<PODTest, N>& fll) {
+  SECTION("random fill with emplace() to keep it sorted") {
+    std::list<PODTest> list;
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    auto emplaceSorted = [](auto& l, int e) {
+      auto it = l.emplace(std::find_if(std::begin(l), std::end(l), [e](PODTest const& pod) {
+        return pod.i > e;
+      }));
+      it->i = e;
+    };
+
+    for (int i = 0; i < fll.capacity(); ++i) {
+      REQUIRE(fll.capacity() == FLL_CAPACITY);
+      REQUIRE(fll.size() == i);
+
+      int elem = dist(gen);
+      emplaceSorted(fll, elem);
+      emplaceSorted(list, elem);
+
+      CAPTURE(fll, list);
+      require_equal(fll, list);
+      REQUIRE(!fll.empty());
+      REQUIRE(std::is_sorted(std::begin(fll), std::end(fll)));
+    }
+
+    CAPTURE(list, fll);
+    REQUIRE(fll.size() == fll.capacity());
+    if /* constexpr */ (do_test_erase) {
+      test_erase(fll);
+    }
+  }
+}
+
+template <std::uint8_t N> //
+void test_erase(Pinetime::FlatLinkedList<PODTest, N>& fll) {
+  std::list<PODTest> list(std::begin(fll), std::end(fll));
+  require_equal(fll, list);
+
+  SECTION("erase from the end") {
+    REQUIRE(fll.size() == N);
+    for (int i = fll.size() - 1; i >= 0; --i) {
+      REQUIRE(!fll.empty());
+      auto it = fll.erase(std::prev(fll.end()));
+      // list.erase(std::prev(list.end()));
+      list.pop_back();
+      CAPTURE(list, fll);
+      REQUIRE(it == fll.end());
+      require_equal(fll, list);
+    }
+    REQUIRE(fll.empty());
+    test_random_fill_sorted<false>(fll);
+  }
+
+  SECTION("erase from the begining") {
+    REQUIRE(fll.size() == N);
+    for (int i = fll.size() - 1; i >= 0; --i) {
+      REQUIRE(!fll.empty());
+      auto it = fll.erase(fll.begin());
+      // list.erase(list.begin());
+      list.pop_front();
+      CAPTURE(list, fll);
+      REQUIRE(it == fll.begin());
+      require_equal(fll, list);
+    }
+    REQUIRE(fll.empty());
+    test_random_fill_sorted<false>(fll);
+  }
+
+  // - test random emplace/remove and compare with std::list
+  SECTION("erase random positions") {
+    REQUIRE(fll.size() == N);
+    for (int i = fll.size() - 1; i >= 0; --i) {
+      REQUIRE(!fll.empty());
+      auto pos_to_erase = uniform_rand(0, list.size() - 1);
+      auto it_to_erase = std::next(fll.begin(), pos_to_erase);
+      auto it_after_erased = std::next(it_to_erase);
+      auto it = fll.erase(it_to_erase);
+      list.erase(std::next(list.begin(), pos_to_erase));
+      CAPTURE(list, fll);
+      REQUIRE(it == it_after_erased);
+      require_equal(fll, list);
+    }
+    REQUIRE(fll.empty());
+    test_random_fill_sorted<false>(fll);
+  }
+}
+
 TEST_CASE("FlatLinkedList", "[FlatLinkedList]") {
-  constexpr std::uint8_t FLL_CAPACITY = 10;
   Pinetime::FlatLinkedList<PODTest, FLL_CAPACITY> fll;
 
   SECTION("Empty FlatLinkedList") {
@@ -101,7 +223,7 @@ TEST_CASE("FlatLinkedList", "[FlatLinkedList]") {
   SECTION("fill with emplace_back") {
     std::vector<PODTest> vec;
     vec.reserve(fll.capacity());
-    for (std::size_t i = 0; i < fll.capacity(); ++i) {
+    for (int i = 0; i < fll.capacity(); ++i) {
       REQUIRE(fll.capacity() == FLL_CAPACITY);
       REQUIRE(fll.size() == i);
 
@@ -116,21 +238,19 @@ TEST_CASE("FlatLinkedList", "[FlatLinkedList]") {
       } else {
         REQUIRE(!it.HasPrev());
       }
-      REQUIRE(std::equal(std::begin(fll), std::end(fll), std::begin(vec), std::end(vec)));
-      REQUIRE(std::equal(
-        std::make_reverse_iterator(std::end(fll)), std::make_reverse_iterator(std::begin(fll)), std::rbegin(vec), std::rend(vec)));
-      REQUIRE(fll.front() == vec.front());
-      REQUIRE(fll.back() == vec.back());
+      require_equal(fll, vec);
       REQUIRE(!fll.empty());
     }
 
     CAPTURE(vec, fll);
     REQUIRE(fll.size() == fll.capacity());
+
+    test_erase(fll);
   }
   SECTION("fill with emplace(begin())") {
     std::list<PODTest> list;
 
-    for (std::size_t i = 0; i < fll.capacity(); ++i) {
+    for (int i = 0; i < fll.capacity(); ++i) {
       REQUIRE(fll.capacity() == FLL_CAPACITY);
       REQUIRE(fll.size() == i);
 
@@ -146,48 +266,14 @@ TEST_CASE("FlatLinkedList", "[FlatLinkedList]") {
         REQUIRE(!it.HasNext());
       }
 
-      REQUIRE(std::equal(std::begin(fll), std::end(fll), std::begin(list), std::end(list)));
-      REQUIRE(std::equal(
-        std::make_reverse_iterator(std::end(fll)), std::make_reverse_iterator(std::begin(fll)), std::rbegin(list), std::rend(list)));
-      REQUIRE(fll.front() == list.front());
-      REQUIRE(fll.back() == list.back());
+      require_equal(fll, list);
       REQUIRE(!fll.empty());
     }
     CAPTURE(list, fll);
     REQUIRE(fll.size() == fll.capacity());
+
+    test_erase(fll);
   }
   // - test emplace in sorted one to keep it sorted
-  SECTION("random fill with emplace() to keep it sorted") {
-    std::list<PODTest> list;
-    std::uniform_int_distribution<int> dist(0, 99);
-
-    auto emplaceSorted = [](auto& l, int e) {
-      auto it = l.emplace(std::find_if(std::begin(l), std::end(l), [e](PODTest const& pod) {
-        return pod.i > e;
-      }));
-      it->i = e;
-    };
-
-    for (std::size_t i = 0; i < fll.capacity(); ++i) {
-      REQUIRE(fll.capacity() == FLL_CAPACITY);
-      REQUIRE(fll.size() == i);
-
-      int elem = dist(gen);
-      emplaceSorted(fll, elem);
-      emplaceSorted(list, elem);
-
-      CAPTURE(fll, list);
-      REQUIRE(std::equal(std::begin(fll), std::end(fll), std::begin(list), std::end(list)));
-      REQUIRE(std::equal(
-        std::make_reverse_iterator(std::end(fll)), std::make_reverse_iterator(std::begin(fll)), std::rbegin(list), std::rend(list)));
-      REQUIRE(fll.front() == list.front());
-      REQUIRE(fll.back() == list.back());
-      REQUIRE(!fll.empty());
-    }
-
-    CAPTURE(list, fll);
-    REQUIRE(fll.size() == fll.capacity());
-    REQUIRE(std::is_sorted(std::begin(fll), std::end(fll)));
-  }
-  // - test random emplace/remove and compare with std::list
+  test_random_fill_sorted<true>(fll);
 }

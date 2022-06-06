@@ -133,13 +133,14 @@ namespace Pinetime {
      * @param pos
      * @return constexpr iterator
      */
-    constexpr iterator emplace(iterator pos) {
+    constexpr iterator emplace(const_iterator pos) {
       size_type newIdx = takeFreeElem();
 
       arr[newIdx].fllNextIdx = pos.pos;
       if (pos != end()) {
         arr[newIdx].fllPrevIdx = pos->fllPrevIdx;
-        pos->fllPrevIdx = newIdx;
+        // pos->fllPrevIdx = newIdx; // can't on const_iterator
+        arr[pos.pos].fllPrevIdx = newIdx;
       } else {
         arr[newIdx].fllPrevIdx = lastIdx;
         lastIdx = newIdx;
@@ -149,8 +150,28 @@ namespace Pinetime {
       } else {
         firstIdx = newIdx;
       }
-      ++sz;
       return iterator(newIdx, *this);
+    }
+
+    constexpr iterator erase(const_iterator pos) {
+      auto prevIdx = pos->fllPrevIdx;
+      auto nextIdx = pos->fllNextIdx;
+      if (prevIdx == npos) {
+        firstIdx = nextIdx;
+      } else {
+        arr[prevIdx].fllNextIdx = nextIdx;
+      }
+      if (nextIdx == npos) {
+        lastIdx = prevIdx;
+      } else {
+        arr[nextIdx].fllPrevIdx = prevIdx;
+      }
+
+      arr[pos.pos].fllNextIdx = firstFreeIdx;
+      firstFreeIdx = pos.pos;
+
+      --sz;
+      return iterator(nextIdx, *this);
     }
 
     constexpr reference front() {
@@ -198,14 +219,21 @@ namespace Pinetime {
   private:
     constexpr size_type takeFreeElem() {
       ASSERT(size() < capacity());
+      ASSERT(firstFreeIdx < capacity());
 
       // get a new free element
       const size_type newIdx = firstFreeIdx;
+      ++sz;
 
       if (arr[firstFreeIdx].fllNextIdx == npos) {
         // arr[firstFreeIdx..N] are all free
         ++firstFreeIdx;
-        arr[firstFreeIdx].fllNextIdx = npos;
+        if (size() < capacity()) {
+          ASSERT(firstFreeIdx < capacity());
+          arr[firstFreeIdx].fllNextIdx = npos;
+        } else {
+          firstFreeIdx = npos;
+        }
       } else {
         firstFreeIdx = arr[firstFreeIdx].fllNextIdx;
       }
