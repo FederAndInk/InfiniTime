@@ -228,6 +228,7 @@ namespace Pinetime {
         } else if (dp < todayDays) {
           lv_label_set_text_fmt(label, "%d/%02u/%02u past", year, month, day);
         } else {
+          // TODO: weekday
           lv_label_set_text_fmt(label, "%d/%02u/%02u", year, month, day);
         }
       }

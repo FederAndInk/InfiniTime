@@ -79,22 +79,23 @@ namespace Pinetime {
         decltype(CalendarEvent::timestamp) newEvTimestamp {};
         int res = os_mbuf_copydata(ctxt->om, CalendarEvent::timestampOffset, sizeof(CalendarEvent::timestamp), &newEvTimestamp);
         ASSERT(res == 0);
-
+        // TODO: override events if id is found
         CalendarEvent* newEv = [&]() -> CalendarEvent* {
           if (calEvents.capacity() == calEvents.size()) {
             // if the received event starts before the last stored event
             // -> replace the last event by the new
             if (calEvents.back().timestamp > newEvTimestamp) {
               // TODO: send desync lastEv.id back
-              return &calEvents.back();
+              calEvents.pop_back();
             } else {
               // else, reject the event
               return nullptr;
             }
-          } else {
-            return static_cast<CalendarEvent*>(FindSpotForEvent(newEvTimestamp));
           }
+
+          return static_cast<CalendarEvent*>(FindSpotForEvent(newEvTimestamp));
         }();
+
         if (newEv) {
           res = os_mbuf_copydata(ctxt->om, CalendarEvent::idOffset, sizeof(newEv->id), &newEv->id);
           ASSERT(res == 0);
