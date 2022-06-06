@@ -174,6 +174,14 @@ namespace Pinetime {
       return iterator(nextIdx, *this);
     }
 
+    constexpr void pop_back() {
+      erase(iterator {lastIdx, *this});
+    }
+
+    constexpr void pop_front() {
+      erase(begin());
+    }
+
     constexpr reference front() {
       ASSERT(!empty());
       return arr[firstIdx];

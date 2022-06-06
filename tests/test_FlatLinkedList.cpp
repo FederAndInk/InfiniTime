@@ -157,6 +157,19 @@ void test_erase(Pinetime::FlatLinkedList<PODTest, N>& fll) {
     test_random_fill_sorted<false>(fll);
   }
 
+  SECTION("pop_back") {
+    REQUIRE(fll.size() == N);
+    for (int i = fll.size() - 1; i >= 0; --i) {
+      REQUIRE(!fll.empty());
+      fll.pop_back();
+      list.pop_back();
+      CAPTURE(list, fll);
+      require_equal(fll, list);
+    }
+    REQUIRE(fll.empty());
+    test_random_fill_sorted<false>(fll);
+  }
+
   SECTION("erase from the begining") {
     REQUIRE(fll.size() == N);
     for (int i = fll.size() - 1; i >= 0; --i) {
