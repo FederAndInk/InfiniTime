@@ -1,5 +1,7 @@
 #include "components/ble/CalendarEventService.h"
 
+#include <nrf_log.h>
+
 #include <algorithm>
 #include <cstddef>
 
@@ -72,22 +74,41 @@ namespace Pinetime {
         const auto packetLen = OS_MBUF_PKTLEN(ctxt->om);
         if (packetLen <= CalendarEvent::headerSize) {
           return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
+          NRF_LOG_INFO("Cal ev: empty!");
         }
 
         const auto strsSize = std::min(CalendarEvent::maxStringsSize, packetLen - CalendarEvent::headerSize);
 
+        decltype(CalendarEvent::id) newEvId {};
+        int res = os_mbuf_copydata(ctxt->om, CalendarEvent::idOffset, sizeof(newEvId), &newEvId);
+        ASSERT(res == 0);
+        NRF_LOG_INFO("Cal ev id: %d", newEvId);
+        // remove existing event with the same id for replacement
+        {
+          auto it = std::find_if(std::begin(calEvents), std::end(calEvents), [newEvId](CalendarEvent const& ev) {
+            return ev.id == newEvId;
+          });
+          if (it != std::end(calEvents)) {
+            NRF_LOG_INFO("Cal ev replace");
+            calEvents.erase(it);
+          }
+        }
+
         decltype(CalendarEvent::timestamp) newEvTimestamp {};
-        int res = os_mbuf_copydata(ctxt->om, CalendarEvent::timestampOffset, sizeof(CalendarEvent::timestamp), &newEvTimestamp);
+        res = os_mbuf_copydata(ctxt->om, CalendarEvent::timestampOffset, sizeof(newEvTimestamp), &newEvTimestamp);
         ASSERT(res == 0);
         // TODO: override events if id is found
         CalendarEvent* newEv = [&]() -> CalendarEvent* {
           if (calEvents.capacity() == calEvents.size()) {
+            NRF_LOG_INFO("Cal ev no more space");
             // if the received event starts before the last stored event
             // -> replace the last event by the new
             if (calEvents.back().timestamp > newEvTimestamp) {
               // TODO: send desync lastEv.id back
+              NRF_LOG_INFO("Cal ev remove last for new");
               calEvents.pop_back();
             } else {
+              NRF_LOG_INFO("Cal ev reject");
               // else, reject the event
               return nullptr;
             }
@@ -97,8 +118,7 @@ namespace Pinetime {
         }();
 
         if (newEv) {
-          res = os_mbuf_copydata(ctxt->om, CalendarEvent::idOffset, sizeof(newEv->id), &newEv->id);
-          ASSERT(res == 0);
+          newEv->id = newEvId;
           res = os_mbuf_copydata(ctxt->om, CalendarEvent::durationOffset, sizeof(newEv->durationInSeconds), &newEv->durationInSeconds);
           ASSERT(res == 0);
           newEv->timestamp = newEvTimestamp;
