@@ -48,7 +48,7 @@ namespace Pinetime {
       return NthStr(strings, 1);
     }
 
-    CalendarEventService::CalendarEventService()
+    CalendarEventService::CalendarEventService(DateTime& dateTimeController)
       : characteristicDefinition {{{.uuid = &calEventAddCharUuid.u,
                                     .access_cb =
                                       [](uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt, void* arg) -> int {
@@ -65,7 +65,8 @@ namespace Pinetime {
                                     .flags = BLE_GATT_CHR_F_WRITE},
                                    {nullptr}}},
         serviceDefinition {
-          {{.type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &calEventUuid.u, .characteristics = characteristicDefinition.data()}, {0}}} {
+          {{.type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &calEventUuid.u, .characteristics = characteristicDefinition.data()}, {0}}},
+        dateTimeController {dateTimeController} {
     }
 
     void CalendarEventService::Init() {
@@ -77,6 +78,7 @@ namespace Pinetime {
     }
 
     int CalendarEventService::OnAddCalendarEvent(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt) {
+      ClearOldEvents();
       if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
         // Ignore notifications with empty message
         const auto packetLen = OS_MBUF_PKTLEN(ctxt->om);
@@ -157,6 +159,25 @@ namespace Pinetime {
       return calEvents.emplace(std::find_if(std::begin(calEvents), std::end(calEvents), [timestamp](CalendarEvent const& ev) {
         return ev.timestamp > timestamp;
       }));
+    }
+
+    void CalendarEventService::ClearOldEvents() {
+      static constexpr std::uint32_t keepTimeInSeconds = 5 * 60;
+      auto firstEvOrNull = [this]() -> CalendarEvent const* {
+        if (!calEvents.empty()) {
+          return &calEvents.front();
+        } else {
+          return nullptr;
+        }
+      };
+
+      CalendarEvent const* ev = firstEvOrNull();
+      auto currentTimeInSeconds =
+        std::chrono::duration_cast<std::chrono::seconds>(dateTimeController.CurrentDateTime().time_since_epoch()).count();
+      while (ev != nullptr && (ev->timestamp + ev->durationInSeconds + keepTimeInSeconds) < currentTimeInSeconds) {
+        calEvents.pop_front();
+        ev = firstEvOrNull();
+      }
     }
   }
 }
