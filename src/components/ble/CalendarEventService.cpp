@@ -19,6 +19,7 @@ namespace {
 
   constexpr ble_uuid128_t calEventUuid {CalEventBaseUuid()};
   constexpr ble_uuid128_t calEventAddCharUuid {CalEventCharUuid(0x00, 0x01)};
+  constexpr ble_uuid128_t calEventRemoveCharUuid {CalEventCharUuid(0x00, 0x02)};
 
   template <std::size_t N> //
   constexpr char const* NthStr(std::array<char, N> const& strs, std::uint8_t n) {
@@ -51,7 +52,14 @@ namespace Pinetime {
       : characteristicDefinition {{{.uuid = &calEventAddCharUuid.u,
                                     .access_cb =
                                       [](uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt, void* arg) -> int {
-                                      return static_cast<CalendarEventService*>(arg)->OnCommand(conn_handle, attr_handle, ctxt);
+                                      return static_cast<CalendarEventService*>(arg)->OnAddCalendarEvent(conn_handle, attr_handle, ctxt);
+                                    },
+                                    .arg = this,
+                                    .flags = BLE_GATT_CHR_F_WRITE},
+                                   {.uuid = &calEventRemoveCharUuid.u,
+                                    .access_cb =
+                                      [](uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt, void* arg) -> int {
+                                      return static_cast<CalendarEventService*>(arg)->OnRemoveCalendarEvent(conn_handle, attr_handle, ctxt);
                                     },
                                     .arg = this,
                                     .flags = BLE_GATT_CHR_F_WRITE},
@@ -68,7 +76,7 @@ namespace Pinetime {
       ASSERT(res == 0);
     }
 
-    int CalendarEventService::OnCommand(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt) {
+    int CalendarEventService::OnAddCalendarEvent(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt) {
       if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
         // Ignore notifications with empty message
         const auto packetLen = OS_MBUF_PKTLEN(ctxt->om);
@@ -130,11 +138,25 @@ namespace Pinetime {
       return BLE_ERR_SUCCESS;
     }
 
+    int CalendarEventService::OnRemoveCalendarEvent(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt) {
+      decltype(CalendarEvent::id) idToRemove {};
+      int res = os_mbuf_copydata(ctxt->om, CalendarEvent::idOffset, sizeof(idToRemove), &idToRemove);
+      ASSERT(res == 0);
+      auto it = std::find_if(std::begin(calEvents), std::end(calEvents), [idToRemove](CalendarEvent const& ev) {
+        return ev.id == idToRemove;
+      });
+      if (it != std::end(calEvents)) {
+        NRF_LOG_INFO("Cal ev remove %d", idToRemove);
+        calEvents.erase(it);
+        return BLE_ERR_SUCCESS;
+      }
+      return BLE_ATT_ERR_UNLIKELY;
+    }
+
     CalendarEventService::EventRange::iterator CalendarEventService::FindSpotForEvent(std::int32_t timestamp) {
       return calEvents.emplace(std::find_if(std::begin(calEvents), std::end(calEvents), [timestamp](CalendarEvent const& ev) {
         return ev.timestamp > timestamp;
       }));
     }
-
   }
 }

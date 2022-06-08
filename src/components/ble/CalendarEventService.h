@@ -22,7 +22,8 @@ namespace Pinetime {
 
       void Init();
 
-      int OnCommand(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt);
+      int OnAddCalendarEvent(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt);
+      int OnRemoveCalendarEvent(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt);
 
       struct CalendarEvent {
         std::int64_t id;
@@ -72,7 +73,7 @@ namespace Pinetime {
     private:
       EventRange::iterator FindSpotForEvent(std::int32_t timestamp);
 
-      std::array<ble_gatt_chr_def, 2> characteristicDefinition;
+      std::array<ble_gatt_chr_def, 3> characteristicDefinition;
       std::array<ble_gatt_svc_def, 2> serviceDefinition;
 
       EventRange calEvents;
