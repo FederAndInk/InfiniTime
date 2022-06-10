@@ -7,7 +7,9 @@ target_sources(test_FlatLinkedList PRIVATE test_FlatLinkedList.cpp)
 target_link_libraries(test_FlatLinkedList PRIVATE Catch2::Catch2WithMain)
 target_include_directories(
   test_FlatLinkedList
-  PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs ${CMAKE_SOURCE_DIR}/src
+  PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs
+          ${CMAKE_SOURCE_DIR}/src
+          ${CMAKE_SOURCE_DIR}/src/libs
           ${CMAKE_SOURCE_DIR}/src/libs/date/includes
 )
 target_compile_features(test_FlatLinkedList PRIVATE cxx_std_14)
@@ -31,7 +33,9 @@ target_sources(
 target_link_libraries(test_CalendarEvent PRIVATE Catch2::Catch2WithMain)
 target_include_directories(
   test_CalendarEvent
-  PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs ${CMAKE_SOURCE_DIR}/src
+  PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs
+          ${CMAKE_SOURCE_DIR}/src
+          ${CMAKE_SOURCE_DIR}/src/libs
           ${CMAKE_SOURCE_DIR}/src/libs/date/includes
 )
 target_compile_features(test_CalendarEvent PRIVATE cxx_std_14)

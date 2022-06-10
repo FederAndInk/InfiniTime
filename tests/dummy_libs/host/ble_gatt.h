@@ -59,6 +59,10 @@ inline int ble_gatts_add_svcs(const struct ble_gatt_svc_def* svcs) {
   return 0;
 }
 
+inline int ble_gattc_notify_custom(uint16_t conn_handle, uint16_t att_handle, struct os_mbuf* om) {
+  return -1;
+}
+
 /**
  * Context for an access to a GATT characteristic or descriptor.  When a client
  * reads or writes a locally registered characteristic or descriptor, an
