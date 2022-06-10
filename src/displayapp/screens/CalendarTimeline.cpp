@@ -55,6 +55,7 @@ namespace Pinetime {
                                          Controllers::DateTime& dateTimeController)
         : Screen(app), calendarEvent(calendarEvent), dateTimeController(dateTimeController) {
         calendarEvent.ClearOldEvents();
+        calendarEvent.NotifyFreeSpace();
         page = std::make_unique<CalendarTimelinePage>(calendarEvent.GetEvents(), std::begin(calendarEvent.GetEvents()), dateTimeController);
       }
 

@@ -2,8 +2,6 @@
 
 #include "FlatLinkedList.h"
 
-#include "components/datetime/DateTimeController.h"
-
 #define min // workaround: nimble's min/max macros conflict with libstdc++
 #define max
 #include <host/ble_gap.h>
@@ -17,10 +15,15 @@
 #include <date/date.h>
 
 namespace Pinetime {
+  namespace System {
+    class SystemTask;
+  }
   namespace Controllers {
+    class DateTime;
+
     class CalendarEventService {
     public:
-      explicit CalendarEventService(DateTime& dateTimeController);
+      explicit CalendarEventService(System::SystemTask& systemTask, DateTime& dateTimeController);
 
       void Init();
 
@@ -73,15 +76,23 @@ namespace Pinetime {
       }
 
       void ClearOldEvents();
+      void NotifyFreeSpace();
 
     private:
       EventRange::iterator FindSpotForEvent(std::int32_t timestamp);
 
-      std::array<ble_gatt_chr_def, 3> characteristicDefinition;
+      void RejectEvent(std::int64_t id);
+
+      std::array<ble_gatt_chr_def, 5> characteristicDefinition;
       std::array<ble_gatt_svc_def, 2> serviceDefinition;
 
       EventRange calEvents;
+
+      System::SystemTask& systemTask;
       DateTime& dateTimeController;
+
+      std::uint16_t rejectionHandle {};
+      std::uint16_t freeSpaceHandle {};
     };
   }
 }

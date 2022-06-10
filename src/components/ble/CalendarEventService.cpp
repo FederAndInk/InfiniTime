@@ -1,5 +1,8 @@
 #include "components/ble/CalendarEventService.h"
 
+#include "components/datetime/DateTimeController.h"
+#include "systemtask/SystemTask.h"
+
 #include <nrf_log.h>
 
 #include <algorithm>
@@ -20,6 +23,8 @@ namespace {
   constexpr ble_uuid128_t calEventUuid {CalEventBaseUuid()};
   constexpr ble_uuid128_t calEventAddCharUuid {CalEventCharUuid(0x00, 0x01)};
   constexpr ble_uuid128_t calEventRemoveCharUuid {CalEventCharUuid(0x00, 0x02)};
+  constexpr ble_uuid128_t calEventRejectedCharUuid {CalEventCharUuid(0x00, 0x03)};
+  constexpr ble_uuid128_t calEventSpaceAvailableCharUuid {CalEventCharUuid(0x00, 0x04)};
 
   template <std::size_t N> //
   constexpr char const* NthStr(std::array<char, N> const& strs, std::uint8_t n) {
@@ -33,6 +38,12 @@ namespace {
       --n;
     }
     return beginIt;
+  }
+
+  int dummy_callback(uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt, void* arg) {
+    NRF_LOG_WARNING("dummy callback!");
+    // return BLE_ATT_ERR_REQ_NOT_SUPPORTED;
+    return 0;
   }
 }
 
@@ -48,7 +59,7 @@ namespace Pinetime {
       return NthStr(strings, 1);
     }
 
-    CalendarEventService::CalendarEventService(DateTime& dateTimeController)
+    CalendarEventService::CalendarEventService(System::SystemTask& systemTask, DateTime& dateTimeController)
       : characteristicDefinition {{{.uuid = &calEventAddCharUuid.u,
                                     .access_cb =
                                       [](uint16_t conn_handle, uint16_t attr_handle, ble_gatt_access_ctxt* ctxt, void* arg) -> int {
@@ -63,9 +74,21 @@ namespace Pinetime {
                                     },
                                     .arg = this,
                                     .flags = BLE_GATT_CHR_F_WRITE},
+                                   {.uuid = &calEventRejectedCharUuid.u,
+                                    .access_cb = dummy_callback,
+                                    .arg = this,
+                                    .flags = BLE_GATT_CHR_F_NOTIFY,
+                                    .val_handle = &rejectionHandle},
+                                   {.uuid = &calEventSpaceAvailableCharUuid.u,
+                                    .access_cb = dummy_callback,
+                                    .arg = this,
+                                    .flags = BLE_GATT_CHR_F_NOTIFY,
+                                    .val_handle = &freeSpaceHandle},
                                    {nullptr}}},
         serviceDefinition {
-          {{.type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &calEventUuid.u, .characteristics = characteristicDefinition.data()}, {0}}},
+          {{.type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &calEventUuid.u, .characteristics = characteristicDefinition.data()},
+           {BLE_GATT_SVC_TYPE_END}}},
+        systemTask {systemTask},
         dateTimeController {dateTimeController} {
     }
 
@@ -92,7 +115,7 @@ namespace Pinetime {
         decltype(CalendarEvent::id) newEvId {};
         int res = os_mbuf_copydata(ctxt->om, CalendarEvent::idOffset, sizeof(newEvId), &newEvId);
         ASSERT(res == 0);
-        NRF_LOG_INFO("Cal ev id: %d", newEvId);
+        NRF_LOG_INFO("Cal ev id: %ld", newEvId);
         // remove existing event with the same id for replacement
         {
           auto it = std::find_if(std::begin(calEvents), std::end(calEvents), [newEvId](CalendarEvent const& ev) {
@@ -107,19 +130,19 @@ namespace Pinetime {
         decltype(CalendarEvent::timestamp) newEvTimestamp {};
         res = os_mbuf_copydata(ctxt->om, CalendarEvent::timestampOffset, sizeof(newEvTimestamp), &newEvTimestamp);
         ASSERT(res == 0);
-        // TODO: override events if id is found
         CalendarEvent* newEv = [&]() -> CalendarEvent* {
           if (calEvents.capacity() == calEvents.size()) {
             NRF_LOG_INFO("Cal ev no more space");
             // if the received event starts before the last stored event
             // -> replace the last event by the new
             if (calEvents.back().timestamp > newEvTimestamp) {
-              // TODO: send desync lastEv.id back
               NRF_LOG_INFO("Cal ev remove last for new");
+              RejectEvent(calEvents.back().id);
               calEvents.pop_back();
             } else {
               NRF_LOG_INFO("Cal ev reject");
               // else, reject the event
+              RejectEvent(newEvId);
               return nullptr;
             }
           }
@@ -148,7 +171,7 @@ namespace Pinetime {
         return ev.id == idToRemove;
       });
       if (it != std::end(calEvents)) {
-        NRF_LOG_INFO("Cal ev remove %d", idToRemove);
+        NRF_LOG_INFO("Cal ev remove %ld", idToRemove);
         calEvents.erase(it);
         return BLE_ERR_SUCCESS;
       }
@@ -176,6 +199,34 @@ namespace Pinetime {
           calEvents.erase(curIt);
         }
       }
+    }
+
+    void CalendarEventService::RejectEvent(std::int64_t id) {
+      auto* om = ble_hs_mbuf_from_flat(&id, sizeof(id));
+
+      uint16_t connectionHandle = systemTask.nimble().connHandle();
+
+      if (connectionHandle == 0 || connectionHandle == BLE_HS_CONN_HANDLE_NONE) {
+        return;
+      }
+
+      ble_gattc_notify_custom(connectionHandle, rejectionHandle, om);
+    }
+
+    void CalendarEventService::NotifyFreeSpace() {
+      std::uint16_t nbFreeSpots = calEvents.capacity() - calEvents.size();
+      if (nbFreeSpots == 0) {
+        return;
+      }
+      auto* om = ble_hs_mbuf_from_flat(&nbFreeSpots, sizeof(nbFreeSpots));
+
+      uint16_t connectionHandle = systemTask.nimble().connHandle();
+
+      if (connectionHandle == 0 || connectionHandle == BLE_HS_CONN_HANDLE_NONE) {
+        return;
+      }
+
+      ble_gattc_notify_custom(connectionHandle, freeSpaceHandle, om);
     }
   }
 }
