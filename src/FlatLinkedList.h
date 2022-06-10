@@ -60,7 +60,7 @@ namespace Pinetime {
         pos = fll->arr[pos].fllNextIdx;
         return *this;
       }
-      constexpr Iterator operator++(int) const {
+      constexpr Iterator operator++(int) {
         auto tmp = *this;
         ++(*this);
         return tmp;
@@ -73,7 +73,7 @@ namespace Pinetime {
         }
         return *this;
       }
-      constexpr Iterator operator--(int) const {
+      constexpr Iterator operator--(int) {
         auto tmp = *this;
         --(*this);
         return tmp;

@@ -163,20 +163,18 @@ namespace Pinetime {
 
     void CalendarEventService::ClearOldEvents() {
       static constexpr std::uint32_t keepTimeInSeconds = 5 * 60;
-      auto firstEvOrNull = [this]() -> CalendarEvent const* {
-        if (!calEvents.empty()) {
-          return &calEvents.front();
-        } else {
-          return nullptr;
-        }
-      };
 
-      CalendarEvent const* ev = firstEvOrNull();
       auto currentTimeInSeconds =
         std::chrono::duration_cast<std::chrono::seconds>(dateTimeController.CurrentDateTime().time_since_epoch()).count();
-      while (ev != nullptr && (ev->timestamp + ev->durationInSeconds + keepTimeInSeconds) < currentTimeInSeconds) {
-        calEvents.pop_front();
-        ev = firstEvOrNull();
+
+      auto it = std::begin(calEvents);
+      auto end = std::end(calEvents);
+      while (it != end && it->timestamp < currentTimeInSeconds) {
+        auto curIt = it++;
+        if ((curIt->timestamp + curIt->durationInSeconds + keepTimeInSeconds) < currentTimeInSeconds) {
+          NRF_LOG_INFO("Cal ev clearing %ld", curIt->id);
+          calEvents.erase(curIt);
+        }
       }
     }
   }
