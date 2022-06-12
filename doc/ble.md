@@ -6,34 +6,37 @@ This page describes the BLE implementation and API built in this firmware.
 
 ### Table of Contents
 
-- [BLE Connection](#ble-connection)
-- [BLE FS](#ble-fs)
-- [BLE UUIDs](#ble-uuids)
-- [BLE Services](#ble-services)
-  - [CTS](#cts)
-  - [ANS](#ans)
-- [Getting Information](#getting-information)
-  - [Firmware Version](#firmware-version)
-  - [Battery Level](#battery-level)
-  - [Heart Rate](#heart-rate)
-- [Notifications](#notifications)
-  - [New Alert](#new-alert)
-  - [Notification Event](#notification-event)
-- [Firmware Upgrades](#firmware-upgrades)
-  - [Step one](#step-one)
-  - [Step two](#step-two)
-  - [Step three](#step-three)
-  - [Step four](#step-four)
-  - [Step five](#step-five)
-  - [Step six](#step-six)
-  - [Step seven](#step-seven)
-  - [Step eight](#step-eight)
-  - [Step nine](#step-nine)
-- [Music Control](#music-control)
-  - [Events](#events)
-  - [Status](#status)
-  - [Artist, Track, and Album](#artist-track-and-album)
-- [Time](#time)
+- [Bluetooth Low-Energy :](#bluetooth-low-energy-)
+  - [Introduction](#introduction)
+    - [Table of Contents](#table-of-contents)
+  - [BLE Connection](#ble-connection)
+  - [BLE FS](#ble-fs)
+  - [BLE UUIDs](#ble-uuids)
+  - [BLE services](#ble-services)
+    - [CTS](#cts)
+    - [ANS](#ans)
+    - [Getting Information](#getting-information)
+      - [Firmware Version](#firmware-version)
+      - [Battery Level](#battery-level)
+      - [Heart Rate](#heart-rate)
+    - [Notifications](#notifications)
+      - [New Alert](#new-alert)
+      - [Notification Event](#notification-event)
+    - [Firmware Upgrades](#firmware-upgrades)
+      - [Step one](#step-one)
+      - [Step two](#step-two)
+      - [Step three](#step-three)
+      - [Step four](#step-four)
+      - [Step five](#step-five)
+      - [Step six](#step-six)
+      - [Step seven](#step-seven)
+      - [Step eight](#step-eight)
+      - [Step nine](#step-nine)
+    - [Music Control](#music-control)
+      - [Events](#events)
+      - [Status](#status)
+      - [Artist, Track, and Album](#artist-track-and-album)
+    - [Time](#time)
 
 ---
 
@@ -88,6 +91,10 @@ The following custom services are implemented in InfiniTime:
 
 - Since InfiniTime 1.8:
     * [Weather Service](/src/components/ble/weather/WeatherService.h): 00040000-78fc-48fe-8e23-433b3a1942d0
+
+
+- No merge planned:
+    * [CalendarEvent Service](CalendarEventService.md): 00050000-78fc-48fe-8e23-433b3a1942d0
 
 ---
 
