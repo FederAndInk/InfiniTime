@@ -218,20 +218,28 @@ namespace Pinetime {
         auto yearMonthDay = date::year_month_day(dp);
 
         auto year = static_cast<int>(yearMonthDay.year());
-        auto month = static_cast<unsigned>(yearMonthDay.month());
+        auto month = static_cast<Pinetime::Controllers::DateTime::Months>(static_cast<unsigned>(yearMonthDay.month()));
         auto day = static_cast<unsigned>(yearMonthDay.day());
         auto dayOfWeek = static_cast<Pinetime::Controllers::DateTime::Days>(date::weekday(yearMonthDay).iso_encoding());
 
         auto todayDays = date::floor<date::days>(dateTimeController.CurrentDateTime());
+        auto setDateLabel = [&](char const* suffix) {
+          using Controllers::DateTime;
+          lv_label_set_text_fmt(label,
+                                "%s %d %s%s",
+                                DateTime::DayOfWeekShortToString(dayOfWeek),
+                                day,
+                                DateTime::MonthShortToStringLow(month),
+                                suffix);
+        };
         if (todayDays == dp) {
-          lv_label_set_text_fmt(label, "%d/%02u/%02u today", year, month, day);
+          setDateLabel(" today");
         } else if ((todayDays + date::days {1}) == dp) {
-          lv_label_set_text_fmt(label, "%d/%02u/%02u tomorrow", year, month, day);
+          setDateLabel(" tomorrow");
         } else if (dp < todayDays) {
-          lv_label_set_text_fmt(label, "%d/%02u/%02u past", year, month, day);
+          setDateLabel(" past");
         } else {
-          // TODO: weekday
-          lv_label_set_text_fmt(label, "%d/%02u/%02u", year, month, day);
+          setDateLabel("");
         }
       }
 

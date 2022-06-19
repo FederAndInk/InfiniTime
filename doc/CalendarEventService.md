@@ -82,8 +82,8 @@ Before the UI is loaded past events are cleaned up (they also get cleaned up on 
 
 - [ ] Show event details on click
 - [x] Show today/tomorrow
-- [ ] Show weekday
-- [ ] Use month name
+- [x] Show weekday
+- [x] Use month name
 - [ ] Use relative time for event starting in less than ~24h (e.g. "in 23min")
 - [ ] Use the calendar color as a background for the event
 
