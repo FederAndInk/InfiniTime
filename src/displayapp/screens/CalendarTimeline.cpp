@@ -153,6 +153,7 @@ namespace Pinetime {
       }
 
       void CalendarTimelinePage::AddEvent(Controllers::CalendarEventService::CalendarEvent const& ev) {
+        using namespace std::chrono_literals;
         lv_obj_t* cont_event = lv_cont_create(container1, nullptr);
         lv_color_t bg_color = lv_color_darken(lv_color_hex(ev.color), LV_OPA_10);
         lv_color_t fg_color = [bg_color]() {
@@ -167,6 +168,12 @@ namespace Pinetime {
         lv_obj_set_style_local_pad_all(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 5);
         lv_obj_set_style_local_pad_inner(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 5);
         lv_obj_set_style_local_border_width(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
+        auto curTime = dateTimeController.CurrentDateTime();
+        if (date::floor<date::days>(curTime) == ev.GetStartDays() || ev.GetStartTimePoint() < (curTime + 6h)) {
+          // highlight with a border events starting today or in the next 6 hours
+          lv_obj_set_style_local_border_width(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 4);
+          lv_obj_set_style_local_border_color(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, lv_color_darken(bg_color, LV_OPA_40));
+        }
 
         lv_obj_set_size(cont_event, LV_HOR_RES, 0);
 

@@ -86,7 +86,9 @@ Before the UI is loaded past events are cleaned up (they also get cleaned up on 
 - [x] Show weekday
 - [x] Use month name
 - [ ] Use relative time for event starting in less than ~24h (e.g. "in 23min")
+- [ ] Show "Ends in" for ongoing events
 - [x] Use the calendar color as a background for the event
+- [x] Highlight with a border events starting today or in the next 6 hours
 
 ## Testing
 
