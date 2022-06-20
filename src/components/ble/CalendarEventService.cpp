@@ -155,6 +155,8 @@ namespace Pinetime {
           res = os_mbuf_copydata(ctxt->om, CalendarEvent::durationOffset, sizeof(newEv->durationInSeconds), &newEv->durationInSeconds);
           ASSERT(res == 0);
           newEv->timestamp = newEvTimestamp;
+          res = os_mbuf_copydata(ctxt->om, CalendarEvent::colorOffset, sizeof(newEv->color), &newEv->color);
+          ASSERT(res == 0);
           res = os_mbuf_copydata(ctxt->om, CalendarEvent::stringsOffset, strsSize, newEv->strings.data());
           newEv->strings[strsSize] = '\0';
           ASSERT(res == 0);

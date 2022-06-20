@@ -154,8 +154,16 @@ namespace Pinetime {
 
       void CalendarTimelinePage::AddEvent(Controllers::CalendarEventService::CalendarEvent const& ev) {
         lv_obj_t* cont_event = lv_cont_create(container1, nullptr);
-
-        lv_obj_set_style_local_bg_color(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0x07, 0x5e, 0x88));
+        lv_color_t bg_color = lv_color_darken(lv_color_hex(ev.color), LV_OPA_10);
+        lv_color_t fg_color = [bg_color]() {
+          std::uint8_t lum = lv_color_brightness(bg_color);
+          if (lum > 128) {
+            return LV_COLOR_BLACK;
+          } else {
+            return LV_COLOR_WHITE;
+          }
+        }();
+        lv_obj_set_style_local_bg_color(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, bg_color);
         lv_obj_set_style_local_pad_all(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 5);
         lv_obj_set_style_local_pad_inner(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 5);
         lv_obj_set_style_local_border_width(cont_event, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
@@ -166,21 +174,21 @@ namespace Pinetime {
         lv_cont_set_fit2(cont_event, LV_FIT_PARENT, LV_FIT_TIGHT);
 
         lv_obj_t* ev_title_label = lv_label_create(cont_event, nullptr);
-        lv_obj_set_style_local_text_color(ev_title_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
+        lv_obj_set_style_local_text_color(ev_title_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, fg_color);
         lv_label_set_text(ev_title_label, ev.GetTitle());
         RemoveNl(ev_title_label);
         lv_label_set_long_mode(ev_title_label, LV_LABEL_LONG_CROP);
         lv_obj_set_width(ev_title_label, LV_HOR_RES);
 
         lv_obj_t* ev_loc_label = lv_label_create(cont_event, nullptr);
-        lv_obj_set_style_local_text_color(ev_loc_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
+        lv_obj_set_style_local_text_color(ev_loc_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, fg_color);
         lv_label_set_text(ev_loc_label, ev.GetLocation());
         RemoveNl(ev_loc_label);
         lv_label_set_long_mode(ev_loc_label, LV_LABEL_LONG_CROP);
         lv_obj_set_width(ev_loc_label, LV_HOR_RES);
 
         lv_obj_t* ev_time_label = lv_label_create(cont_event, nullptr);
-        lv_obj_set_style_local_text_color(ev_time_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_MAKE(0xff, 0xb0, 0x0));
+        lv_obj_set_style_local_text_color(ev_time_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, fg_color);
         // lv_label_set_text_static(ev_time_label, "11:30 AM - 12:30 PM");
         auto start = ev.GetStartTimePoint();
         auto dp = date::floor<date::days>(start);

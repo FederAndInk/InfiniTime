@@ -22,6 +22,7 @@ Characteristic value layout:
 - (`int64`) `id`
 - (`int32`) `durationInSeconds`
 - (`int32`) `timestamp`
+- (`int32`) `color`
 - (`char[150]`) `strings`
 
 The `strings` contains the title, location and description separated by `'\0'`,
@@ -85,7 +86,7 @@ Before the UI is loaded past events are cleaned up (they also get cleaned up on 
 - [x] Show weekday
 - [x] Use month name
 - [ ] Use relative time for event starting in less than ~24h (e.g. "in 23min")
-- [ ] Use the calendar color as a background for the event
+- [x] Use the calendar color as a background for the event
 
 ## Testing
 

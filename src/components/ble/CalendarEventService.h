@@ -38,6 +38,7 @@ namespace Pinetime {
          *
          */
         std::int32_t timestamp;
+        std::int32_t color;
 
         static constexpr std::size_t maxStringsSize {150};
         /// title + '\0' + location + '\0' + description + '\0'
@@ -46,8 +47,9 @@ namespace Pinetime {
         static constexpr std::size_t idOffset {0};
         static constexpr std::size_t durationOffset {sizeof(id)};
         static constexpr std::size_t timestampOffset {durationOffset + sizeof(durationInSeconds)};
-        static constexpr std::size_t stringsOffset {timestampOffset + sizeof(timestamp)};
-        static constexpr std::size_t headerSize {sizeof(id) + sizeof(durationInSeconds) + sizeof(timestamp)};
+        static constexpr std::size_t colorOffset {timestampOffset + sizeof(timestamp)};
+        static constexpr std::size_t stringsOffset {colorOffset + sizeof(color)};
+        static constexpr std::size_t headerSize {sizeof(id) + sizeof(durationInSeconds) + sizeof(timestamp) + sizeof(color)};
 
         std::uint8_t fllNextIdx;
         std::uint8_t fllPrevIdx;
