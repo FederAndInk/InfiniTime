@@ -6,6 +6,8 @@
 
 #include <date/date.h>
 
+#include <cstdio>
+
 namespace {
   void RemoveNl(lv_obj_t* label) {
     char* pchar = strchr(lv_label_get_text(label), '\n');
@@ -203,28 +205,73 @@ namespace Pinetime {
         std::uint8_t hours = time.hours().count();
         std::uint8_t minutes = time.minutes().count();
 
-        auto duration = date::make_time(std::chrono::seconds {ev.durationInSeconds});
-        std::uint32_t hdur = duration.hours().count();
-        std::uint32_t mdur = duration.minutes().count();
+        auto duration = std::chrono::seconds {ev.durationInSeconds};
+        auto durationTime = date::make_time(duration);
+        std::uint32_t hdur = durationTime.hours().count();
+        std::uint32_t mdur = durationTime.minutes().count();
+
+        auto end = start + duration;
+        auto endDays = date::floor<date::days>(end);
+        auto endTime = date::make_time(end - endDays);
+        std::uint8_t endHours = endTime.hours().count();
+        std::uint8_t endMinutes = endTime.minutes().count();
+
         if (hours == 0 && minutes == 0 && hdur == 24 && mdur == 0) {
           lv_label_set_text_static(ev_time_label, "All day");
         } else {
-          if (hdur != 0) {
-            if (mdur != 0) {
-              lv_label_set_text_fmt(ev_time_label, "%02d:%02d (%dh%dm)", hours, minutes, hdur, mdur);
+          // "In 12h30, \0" or "Ends in 12h30, \0"
+          std::array<char, 15 + 1> inTimeStr = {""};
+          // event started or ended
+          if (curTime >= start) {
+            // event ongoing
+            if (curTime < (end)) {
+              auto time = date::make_time(end - curTime);
+              std::uint8_t hours = time.hours().count();
+              std::uint8_t minutes = time.minutes().count() + 1;
+              if (hours != 0) {
+                std::snprintf(inTimeStr.data(), inTimeStr.size(), "Ends in %dh%d, ", hours, minutes);
+              } else {
+                std::snprintf(inTimeStr.data(), inTimeStr.size(), "Ends in %dm, ", minutes);
+              }
             } else {
-              lv_label_set_text_fmt(ev_time_label, "%02d:%02d (%dh)", hours, minutes, hdur);
+              // event ended
+              inTimeStr = {"Ended "};
             }
-          } else {
-            if (mdur != 0) {
-              lv_label_set_text_fmt(ev_time_label, "%02d:%02d (%dm)", hours, minutes, mdur);
+          } else if (curTime < start && start < (curTime + 6h)) {
+            // event starting soon
+            auto time = date::make_time(start - curTime);
+            std::uint8_t hours = time.hours().count();
+            std::uint8_t minutes = time.minutes().count() + 1;
+            if (hours != 0) {
+              std::snprintf(inTimeStr.data(), inTimeStr.size(), "In %dh%d, ", hours, minutes);
             } else {
-              lv_label_set_text_fmt(ev_time_label, "%02d:%02d", hours, minutes);
+              std::snprintf(inTimeStr.data(), inTimeStr.size(), "In %dm, ", minutes);
+            }
+          }
+
+          // event started or ended
+          if (curTime >= start) {
+            lv_label_set_text_fmt(ev_time_label, "%s%02d:%02d", inTimeStr.data(), endHours, endMinutes);
+          } else {
+            // event not yet started
+
+            if (hdur != 0) {
+              if (mdur != 0) {
+                lv_label_set_text_fmt(ev_time_label, "%s%02d:%02d (%dh%dm)", inTimeStr.data(), hours, minutes, hdur, mdur);
+              } else {
+                lv_label_set_text_fmt(ev_time_label, "%s%02d:%02d (%dh)", inTimeStr.data(), hours, minutes, hdur);
+              }
+            } else {
+              if (mdur != 0) {
+                lv_label_set_text_fmt(ev_time_label, "%s%02d:%02d (%dm)", inTimeStr.data(), hours, minutes, mdur);
+              } else {
+                lv_label_set_text_fmt(ev_time_label, "%s%02d:%02d", inTimeStr.data(), hours, minutes);
+              }
             }
           }
         }
 
-        lv_label_set_long_mode(ev_time_label, LV_LABEL_LONG_CROP);
+        lv_label_set_long_mode(ev_time_label, LV_LABEL_LONG_SROLL_CIRC);
         lv_obj_set_width(ev_time_label, LV_HOR_RES);
       }
 

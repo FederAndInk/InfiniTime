@@ -71,13 +71,13 @@ Moreover, random access is not required, for a page based app only the previous 
 
 <img src="ui/timeline_app.gif" width="313"/>
 
-The timeline application is accessible directly by swiping on the right from the main clock screen.
+The timeline application is accessible directly by swiping to the right from the main clock screen.
 The UI contains pages of 2 events in cards. Arrows are used to denote if there is a page up or downward.
 
 The first line contains the event's title, the second the location and the last is for the start time with the duration in parentheses.
 The date is shown before the event card, if the event is starting today or tomorrow it is shown.
 
-Before the UI is loaded past events are cleaned up (they also get cleaned up on [add event characteristic write](#add-event-write-uuid-00050001-78fc-48fe-8e23-433b3a1942d0) ).
+Before the UI is loaded, past events are cleaned up (they also get cleaned up on [add event characteristic write](#add-event-write-uuid-00050001-78fc-48fe-8e23-433b3a1942d0) ).
 
 ## Areas for improvement
 
@@ -85,8 +85,8 @@ Before the UI is loaded past events are cleaned up (they also get cleaned up on 
 - [x] Show today/tomorrow
 - [x] Show weekday
 - [x] Use month name
-- [ ] Use relative time for event starting in less than ~24h (e.g. "in 23min")
-- [ ] Show "Ends in" for ongoing events
+- [x] Use relative time for event starting in less than ~24h (e.g. "in 23min")
+- [x] Show "Ends in" for ongoing events
 - [x] Use the calendar color as a background for the event
 - [x] Highlight with a border events starting today or in the next 6 hours
 
