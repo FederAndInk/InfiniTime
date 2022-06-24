@@ -59,15 +59,15 @@ namespace Pinetime {
       Pinetime::Controllers::MusicService& music() {
         return musicService;
       };
-      Pinetime::Controllers::NavigationService& navigation() {
-        return navService;
-      };
+      // Pinetime::Controllers::NavigationService& navigation() {
+      //   return navService;
+      // };
       Pinetime::Controllers::AlertNotificationService& alertService() {
         return anService;
       };
-      Pinetime::Controllers::WeatherService& weather() {
-        return weatherService;
-      };
+      // Pinetime::Controllers::WeatherService& weather() {
+      //   return weatherService;
+      // };
       Pinetime::Controllers::CalendarEventService& calendarEvent() {
         return calendarEventService;
       };
@@ -100,9 +100,9 @@ namespace Pinetime {
       AlertNotificationClient alertNotificationClient;
       CurrentTimeService currentTimeService;
       MusicService musicService;
-      WeatherService weatherService;
+      // WeatherService weatherService;
       CalendarEventService calendarEventService;
-      NavigationService navService;
+      // NavigationService navService;
       BatteryInformationService batteryInformationService;
       ImmediateAlertService immediateAlertService;
       HeartRateService heartRateService;
