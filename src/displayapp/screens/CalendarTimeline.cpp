@@ -225,9 +225,9 @@ namespace Pinetime {
           if (curTime >= start) {
             // event ongoing
             if (curTime < (end)) {
-              auto time = date::make_time(end - curTime);
+              auto time = date::make_time(end - curTime + 1min);
               std::uint8_t hours = time.hours().count();
-              std::uint8_t minutes = time.minutes().count() + 1;
+              std::uint8_t minutes = time.minutes().count();
               if (hours != 0) {
                 std::snprintf(inTimeStr.data(), inTimeStr.size(), "Ends in %dh%d, ", hours, minutes);
               } else {
@@ -239,9 +239,9 @@ namespace Pinetime {
             }
           } else if (curTime < start && start < (curTime + 6h)) {
             // event starting soon
-            auto time = date::make_time(start - curTime);
+            auto time = date::make_time(start - curTime + 1min);
             std::uint8_t hours = time.hours().count();
-            std::uint8_t minutes = time.minutes().count() + 1;
+            std::uint8_t minutes = time.minutes().count();
             if (hours != 0) {
               std::snprintf(inTimeStr.data(), inTimeStr.size(), "In %dh%d, ", hours, minutes);
             } else {
