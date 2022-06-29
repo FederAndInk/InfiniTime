@@ -53,6 +53,8 @@ namespace Pinetime {
       using pointer = cond_pointer;
       using reference = cond_reference;
 
+      constexpr Iterator() : pos {npos}, fll {nullptr} {
+      }
       constexpr Iterator(Iterator<false> const& other) : pos {other.pos}, fll {other.fll} {
       }
 

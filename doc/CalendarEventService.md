@@ -81,7 +81,7 @@ Before the UI is loaded, past events are cleaned up (they also get cleaned up on
 
 ## Areas for improvement
 
-- [ ] Show event details on click
+- [x] Show event details on click
 - [x] Show today/tomorrow
 - [x] Show weekday
 - [x] Use month name
