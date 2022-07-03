@@ -78,13 +78,16 @@ Moreover, random access is not required, for a page based app only the previous 
 ## UI
 
 <img src="ui/timeline_app.gif" width="313"/>
+<img src="ui/timeline_app_infinisim_final.gif" width="200"/>
+
+On the left a basic first UI, on the right the final UI with all the improvements
 
 The timeline application is accessible directly by swiping left from the main clock screen.
 The UI contains pages of 2 events in cards. Arrows are used to denote if there is a page up or downward.
 
 The first line contains the event's title, the second the location and the last is for the start time with the duration in parentheses.
 For events starting soon(<6h), a relative starting time is shown and for ongoing events the relative end time is shown.
-The date — with the weekday and month names — is shown before the event card, if the event is starting today or tomorrow it is shown.
+The date — with the weekday and month names — is shown before the event card, if the event is starting today or tomorrow it is written, event starting today also have a subtle border.
 The event card — with the calendar color as its background — can be clicked to show the description and a most complete title and location.
 
 Before the UI is loaded, past events are cleaned up (they also get cleaned up on [add event characteristic (write)](#add-event-write-uuid-00050001-78fc-48fe-8e23-433b3a1942d0) ).
