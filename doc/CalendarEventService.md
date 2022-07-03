@@ -46,10 +46,18 @@ Characteristic value layout:
 When receiving a new event, if there is no more space to store it the event starting last is "rejected",
 meaning it is removed and the companion app is notified the event is no more stored on the device.
 
+Sending:
+
+- (`int64`) `id`
+
 ### number free spots available for n events (notify) (UUID 00050004-78fc-48fe-8e23-433b3a1942d0)
 
 On certain occasion (when loading the timeline app for now), the companion app is notified if there is
 space to receive previously rejected events.
+
+Sending:
+
+- (`uint16`) `freeSpots`
 
 ## [FlatLinkedList](/src/FlatLinkedList.h) container
 
@@ -71,13 +79,15 @@ Moreover, random access is not required, for a page based app only the previous 
 
 <img src="ui/timeline_app.gif" width="313"/>
 
-The timeline application is accessible directly by swiping to the right from the main clock screen.
+The timeline application is accessible directly by swiping left from the main clock screen.
 The UI contains pages of 2 events in cards. Arrows are used to denote if there is a page up or downward.
 
 The first line contains the event's title, the second the location and the last is for the start time with the duration in parentheses.
-The date is shown before the event card, if the event is starting today or tomorrow it is shown.
+For events starting soon(<6h), a relative starting time is shown and for ongoing events the relative end time is shown.
+The date — with the weekday and month names — is shown before the event card, if the event is starting today or tomorrow it is shown.
+The event card — with the calendar color as its background — can be clicked to show the description and a most complete title and location.
 
-Before the UI is loaded, past events are cleaned up (they also get cleaned up on [add event characteristic write](#add-event-write-uuid-00050001-78fc-48fe-8e23-433b3a1942d0) ).
+Before the UI is loaded, past events are cleaned up (they also get cleaned up on [add event characteristic (write)](#add-event-write-uuid-00050001-78fc-48fe-8e23-433b3a1942d0) ).
 
 ## Areas for improvement
 
@@ -85,7 +95,7 @@ Before the UI is loaded, past events are cleaned up (they also get cleaned up on
 - [x] Show today/tomorrow
 - [x] Show weekday
 - [x] Use month name
-- [x] Use relative time for event starting in less than ~24h (e.g. "in 23min")
+- [x] Use relative time for event starting in less than ~6h (e.g. "in 23min")
 - [x] Show "Ends in" for ongoing events
 - [x] Use the calendar color as a background for the event
 - [x] Highlight with a border events starting today or in the next 6 hours
