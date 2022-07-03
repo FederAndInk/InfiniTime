@@ -393,7 +393,7 @@ namespace Pinetime {
         lv_obj_set_style_local_bg_color(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
         lv_obj_set_style_local_pad_all(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
         lv_obj_set_style_local_pad_ver(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
-        lv_obj_set_style_local_pad_inner(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 4);
+        lv_obj_set_style_local_pad_inner(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 2);
         lv_obj_set_style_local_border_width(container1, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
 
         lv_obj_set_pos(container1, 0, 0);
@@ -410,6 +410,15 @@ namespace Pinetime {
         lv_obj_set_width(ev_title_label, LV_HOR_RES - 5);
         lv_obj_align(ev_title_label, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
 
+        if (event.GetLocation()[0] != '\0') {
+          lv_obj_t* ev_loc_label = lv_label_create(container1, nullptr);
+          lv_obj_set_style_local_text_color(ev_loc_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+          lv_label_set_text(ev_loc_label, event.GetLocation());
+          RemoveNl(ev_loc_label);
+          lv_label_set_long_mode(ev_loc_label, LV_LABEL_LONG_SROLL_CIRC);
+          lv_obj_set_width(ev_loc_label, LV_HOR_RES - 5);
+        }
+
         lv_obj_t* cont_event = lv_cont_create(container1, nullptr);
         lv_color_t bg_color = lv_color_darken(lv_color_hex(event.color), LV_OPA_10);
         lv_color_t fg_color = fg_color_from_bg_color(bg_color);
@@ -422,15 +431,6 @@ namespace Pinetime {
         lv_obj_set_size(cont_event, LV_HOR_RES, 0);
         lv_cont_set_layout(cont_event, LV_LAYOUT_COLUMN_LEFT);
         lv_cont_set_fit2(cont_event, LV_FIT_PARENT, LV_FIT_TIGHT);
-
-        if (event.GetLocation()[0] != '\0') {
-          lv_obj_t* ev_loc_label = lv_label_create(cont_event, nullptr);
-          lv_obj_set_style_local_text_color(ev_loc_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, fg_color);
-          lv_label_set_text(ev_loc_label, event.GetLocation());
-          RemoveNl(ev_loc_label);
-          lv_label_set_long_mode(ev_loc_label, LV_LABEL_LONG_SROLL_CIRC);
-          lv_obj_set_width(ev_loc_label, LV_HOR_RES - 5);
-        }
 
         lv_obj_t* ev_description_label = lv_label_create(cont_event, nullptr);
         lv_obj_set_style_local_text_color(ev_description_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, fg_color);
