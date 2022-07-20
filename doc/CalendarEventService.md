@@ -102,6 +102,8 @@ Before the UI is loaded, past events are cleaned up (they also get cleaned up on
 - [x] Show "Ends in" for ongoing events
 - [x] Use the calendar color as a background for the event
 - [x] Highlight with a border events starting today or in the next 6 hours
+- [ ] Use settings to show 12 or 24 hours
+- [ ] Use new timezone handling by the pinetime
 
 ## Testing
 
