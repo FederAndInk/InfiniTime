@@ -305,7 +305,8 @@ namespace Pinetime {
               setInTime(end, "Ends in ");
             } else {
               // event ended
-              inTimeStr = {"Ended "};
+              // gcc 10.3 bug, `inTimeStr = {"Ended "};` is working on gcc 11
+              strcpy(inTimeStr.data(), "Ended ");
             }
           } else if (curTime < start && start < (curTime + 6h)) {
             // event starting soon
