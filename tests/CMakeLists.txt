@@ -10,7 +10,7 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/src/libs
-          ${CMAKE_SOURCE_DIR}/src/libs/date/includes
+          ${CMAKE_SOURCE_DIR}/src/libs/date/include
 )
 target_compile_features(test_FlatLinkedList PRIVATE cxx_std_14)
 target_compile_options(
@@ -36,7 +36,7 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dummy_libs
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/src/libs
-          ${CMAKE_SOURCE_DIR}/src/libs/date/includes
+          ${CMAKE_SOURCE_DIR}/src/libs/date/include
 )
 target_compile_features(test_CalendarEvent PRIVATE cxx_std_14)
 target_compile_options(
